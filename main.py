@@ -4,6 +4,23 @@ import pyshark
 
 usage = """usage: ./main.py [.pcap file] [duration] [.json database file]"""
 
+# Here you can define the devices you expect to find traces from
+ip_name_dict = {
+    'localhost': [
+        '192.168.0.1',
+        '127.0.0.1'
+    ],
+    'next_device': [
+        'all',
+        'of',
+        'the',
+        'IPv4',
+        'and'
+        'IPv6',
+        'addresses'
+    ]
+}
+
 # "Frame" (15 minutes of traffic)
 # 
 # - #Total L4 Packages
@@ -18,6 +35,16 @@ usage = """usage: ./main.py [.pcap file] [duration] [.json database file]"""
 #             "TLS 1.1": #L4 Packages
 #             "TLS 1.3": #L4 Packages    
 #             }
+
+
+# Stamp 1
+# - timestamp
+# - duration
+# - devices:
+#   - laptop1:
+#      - total
+#      - total_ipv4
+#      - ...
 
 class Stamp:
     def __init__(self):
@@ -68,3 +95,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def get_ip_name(ip):
+    for key, val in ip_name_dict.items():
+        if ip in val:
+            return key
+    return 'unknown'
