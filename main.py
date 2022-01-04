@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
 def get_device_of_packet(src, dst):
     for key, val in ip_name_dict.items():
-        if ip in val:
+        if src in val:
             return key
         if dst in val:
             return key
