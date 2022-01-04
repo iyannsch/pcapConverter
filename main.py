@@ -2,6 +2,7 @@ import sys
 import os
 import pyshark
 import json
+import pickle
 
 usage = """usage: ./main.py [.pcap file] [.json database file]"""
 
@@ -64,7 +65,6 @@ class MasterStamp:
         self.duration = 0       # Duration of stamp in seconds TODO
         self.devices = {}       # Dictionary of Device Stamps
 
-
 class DeviceStamp:
     def __init__(self):
         self.total = 0          # Total amount of L4 packages
@@ -108,19 +108,30 @@ def main():
             if(not dns_name in mstamp.devices[dev_name].dns):
                 mstamp.devices[dev_name].dns.append(dns_name)
 
-    # TODO Serialize / Append this stamp object
-    #if(not os.path.exists(output_file)):
-    #    with open(output_file, "wb") as fh:
-    #        pickle.dump([], fh)
 
-    #with open(output_file, "wb+") as fh:
-    #    db = pickle.load(fh)
-    #    db.append(mstamp)
-    #    pickle.dump(db, fh)
+    # Serialize / Append this stamp object
+    if(not os.path.exists(output_file)):
+        db = []
+    else:
+        with open(output_file, "r") as fh:
+            db = json.load(fh)
 
-    # print("Pkg count", stamp.total)
-    # print("Pkg count ip4", stamp.total_ipv4)
-    # print("Pkg count ip6", stamp.total_ipv6)
+    db.append(mstamp)
+
+    with open(output_file, "w+") as fh:
+        json.dump(
+                db, 
+                fh, 
+                default=lambda o:o.__dict__,
+                indent=2
+                )
+
+    print("Current DB:")
+    print(json.dumps(
+                db, 
+                default=lambda o:o.__dict__,
+                indent=2
+                ))
 
 if __name__ == "__main__":
     main()
