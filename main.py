@@ -52,9 +52,9 @@ def main():
             stamp.total_ipv6 += 1
 
     # TODO Serialize / Append this stamp object
-    print("Pkg count", pkg_count)
-    print("Pkg count ip4", pkg_count_ipv4)
-    print("Pkg count ip6", pkg_count_ipv6)
+    print("Pkg count", stamp.total)
+    print("Pkg count ip4", stamp.total_ipv4)
+    print("Pkg count ip6", stamp.total_ipv6)
 
 if __name__ == "__main__":
     main()
