@@ -3,7 +3,7 @@ import os
 import pyshark
 import json
 
-usage = """usage: ./main.py [.pcap file] [duration in seconds] [.json database file]"""
+usage = """usage: ./main.py [path to .pcap file] [duration in seconds] [path to .json database file]"""
 
 # Here you can define the devices you expect to find traces from
 ip_name_dict = {
@@ -24,21 +24,6 @@ ip_name_dict = {
         '192.168.5.185',
     ]
 }
-
-# "Frame"-format (15 minutes of traffic)
-# 
-# - #Total L4 Packages
-# - #Total L4 Packages encrypted
-# - protocols {
-#             "udp": #L4 Packages,
-#             "tcp": #L4 Packages,
-#             ...    
-#         }
-# - dns ["ocs.apple.com", "abc.google.com", ...]
-# - encryption types {
-#             "TLS 1.1": #L4 Packages
-#             "TLS 1.3": #L4 Packages    
-#             }
 
 def get_device_of_packet(src, dst):
     for key, val in ip_name_dict.items():
