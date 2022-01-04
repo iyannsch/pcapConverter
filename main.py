@@ -46,19 +46,23 @@ ip_name_dict = {
 #      - total_ipv4
 #      - ...
 
-class Stamp:
+class MasterStamp:
+    def __init__(self):
+        self.timestamp = ""     # ISO 8601 Timestamp of start of stamp
+        self.duration = 0       # Duration of stamp in seconds
+        self.devices = {}       # Dictionary of Device Stamps
+
+
+class DeviceStamp:
     def __init__(self):
         self.total = 0          # Total amount of L4 packages
         self.total_ipv4 = 0     # Total amount of L4 packages
         self.total_ipv6 = 0     # Total amount of L4 packages
         self.total_enc = 0      # Total amount of encrypted packages
-        self.timestamp = ""     # ISO 8601 Timestamp of start of stamp
-        self.duration = 0       # Duration of stamp in seconds
         self.proto = {}         # Count dictionary for protocols
         self.dns = []           # Array of queried domains
         self.enc_type = {}      # Count dictionary for encryption types
 
-l4_proto = [""]
 
 def main():
     if(len(sys.argv) == 3):
@@ -69,19 +73,28 @@ def main():
 
     cap = pyshark.FileCapture(file_name)
 
-    stamp = Stamp()
+    mstamp = MasterStamp()
 
     for c in cap:
-        stamp.total += 1
+        dev_name = get_device_of_packet(c.ip.src, c.ip.dst)
+        if(not (dev_name in mstamp.devices)):
+            mstamp.devices[dev_name] = DeviceStamp()
+
+        mstamp.devices[dev_name] += 1
         if(c.layers[1].version.show == "4"):
-            stamp.total_ipv4 += 1
+            mstamp.devices[dev_name].total_ipv4 += 1
         elif(c.layers[1].version.show == "6"):
-            stamp.total_ipv6 += 1
+            mstamp.devices[dev_name].total_ipv6 += 1
+        proto_name = c.layers[1].proto.showname_value.split(" ")[0]
+        if(proto_name in mstamp.devices[dev_name].proto):
+            mstamp.devices[dev_name].proto[proto_name] += 1
+        else:
+            mstamp.devices[dev_name].proto[proto_name] = 1
 
     # TODO Serialize / Append this stamp object
-    print("Pkg count", stamp.total)
-    print("Pkg count ip4", stamp.total_ipv4)
-    print("Pkg count ip6", stamp.total_ipv6)
+    # print("Pkg count", stamp.total)
+    # print("Pkg count ip4", stamp.total_ipv4)
+    # print("Pkg count ip6", stamp.total_ipv6)
 
 if __name__ == "__main__":
     main()
