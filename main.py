@@ -2,9 +2,8 @@ import sys
 import os
 import pyshark
 import json
-import pickle
 
-usage = """usage: ./main.py [.pcap file] [.json database file]"""
+usage = """usage: ./main.py [.pcap file] [duration in seconds] [.json database file]"""
 
 # Here you can define the devices you expect to find traces from
 ip_name_dict = {
@@ -26,7 +25,7 @@ ip_name_dict = {
     ]
 }
 
-# "Frame" (15 minutes of traffic)
+# "Frame"-format (15 minutes of traffic)
 # 
 # - #Total L4 Packages
 # - #Total L4 Packages encrypted
@@ -41,16 +40,6 @@ ip_name_dict = {
 #             "TLS 1.3": #L4 Packages    
 #             }
 
-
-# Stamp 1
-# - timestamp
-# - duration
-# - devices:
-#   - laptop1:
-#      - total
-#      - total_ipv4
-#      - ...
-
 def get_device_of_packet(src, dst):
     for key, val in ip_name_dict.items():
         if src in val:
@@ -61,8 +50,8 @@ def get_device_of_packet(src, dst):
 
 class MasterStamp:
     def __init__(self):
-        self.timestamp = ""     # ISO 8601 Timestamp of start of stamp TODO
-        self.duration = 0       # Duration of stamp in seconds TODO
+        self.timestamp = ""     # ISO 8601 Timestamp of start of stamp
+        self.duration = 0       # Duration of stamp in seconds
         self.devices = {}       # Dictionary of Device Stamps
 
 class DeviceStamp:
@@ -76,15 +65,24 @@ class DeviceStamp:
         self.enc_type = {}      # Count dictionary for encryption types TODO
 
 def main():
-    if(not len(sys.argv) == 3):
+    if(not len(sys.argv) == 4):
         print(usage)
         exit(1)
     file_name = sys.argv[1]
-    output_file = sys.argv[2]
+    duration = int(sys.argv[2])
+    output_file = sys.argv[3]
+
+    #################################
+    # Parsing Capture Data          #
+    #################################
 
     cap = pyshark.FileCapture(file_name)
 
     mstamp = MasterStamp()
+
+    timestamp = file_name[4:-5]
+    mstamp.timestamp = timestamp
+    mstamp.duration = duration
 
     for c in cap:
         dev_name = get_device_of_packet(c.ip.src, c.ip.dst)
@@ -109,7 +107,10 @@ def main():
                 mstamp.devices[dev_name].dns.append(dns_name)
 
 
-    # Serialize / Append this stamp object
+    ###################################
+    # Serialize and Append to JSON db #
+    ###################################
+
     if(not os.path.exists(output_file)):
         db = []
     else:
@@ -132,6 +133,12 @@ def main():
                 default=lambda o:o.__dict__,
                 indent=2
                 ))
+
+    ########################
+    # Delete Original File #
+    ########################
+
+    # TODO
 
 if __name__ == "__main__":
     main()
