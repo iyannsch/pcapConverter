@@ -43,9 +43,6 @@ def main():
     cap = pyshark.FileCapture(file_name)
 
     stamp = Stamp()
-    stamp.total = pkg_count
-    stamp.total_ipv4 = pkg_count_ipv4
-    stamp.total_ipv6 = pkg_count_ipv6
 
     for c in cap:
         stamp.total += 1
