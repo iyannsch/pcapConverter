@@ -1,8 +1,9 @@
 import sys
 import os
 import pyshark
+import json
 
-usage = """usage: ./main.py [.pcap file] [duration] [.json database file]"""
+usage = """usage: ./main.py [.pcap file] [.json database file]"""
 
 # Here you can define the devices you expect to find traces from
 ip_name_dict = {
@@ -18,6 +19,9 @@ ip_name_dict = {
         'and'
         'IPv6',
         'addresses'
+    ],
+    'laptop': [
+        '192.168.5.185',
     ]
 }
 
@@ -72,11 +76,11 @@ class DeviceStamp:
         self.enc_type = {}      # Count dictionary for encryption types
 
 def main():
-    if(len(sys.argv) == 3):
+    if(not len(sys.argv) == 3):
         print(usage)
         exit(1)
     file_name = sys.argv[1]
-    print("Parsing", file_name)
+    output_file = sys.argv[2]
 
     cap = pyshark.FileCapture(file_name)
 
@@ -87,18 +91,35 @@ def main():
         if(not (dev_name in mstamp.devices)):
             mstamp.devices[dev_name] = DeviceStamp()
 
-        mstamp.devices[dev_name] += 1
+        mstamp.devices[dev_name].total += 1
         if(c.layers[1].version.show == "4"):
             mstamp.devices[dev_name].total_ipv4 += 1
         elif(c.layers[1].version.show == "6"):
             mstamp.devices[dev_name].total_ipv6 += 1
         proto_name = c.layers[1].proto.showname_value.split(" ")[0]
+
         if(proto_name in mstamp.devices[dev_name].proto):
             mstamp.devices[dev_name].proto[proto_name] += 1
         else:
             mstamp.devices[dev_name].proto[proto_name] = 1
 
+        if("DNS" in c):
+            dns_name = c.dns.qry_name
+            if(not dns_name in mstamp.devices[dev_name].dns):
+                mstamp.devices[dev_name].dns.append(dns_name)
+
+    print(json.dumps(mstamp.devices["laptop"]))
+
     # TODO Serialize / Append this stamp object
+    #if(not os.path.exists(output_file)):
+    #    with open(output_file, "wb") as fh:
+    #        pickle.dump([], fh)
+
+    #with open(output_file, "wb+") as fh:
+    #    db = pickle.load(fh)
+    #    db.append(mstamp)
+    #    pickle.dump(db, fh)
+
     # print("Pkg count", stamp.total)
     # print("Pkg count ip4", stamp.total_ipv4)
     # print("Pkg count ip6", stamp.total_ipv6)
