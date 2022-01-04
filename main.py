@@ -46,6 +46,14 @@ ip_name_dict = {
 #      - total_ipv4
 #      - ...
 
+def get_device_of_packet(src, dst):
+    for key, val in ip_name_dict.items():
+        if src in val:
+            return key
+        if dst in val:
+            return key
+    return 'unknown'
+
 class MasterStamp:
     def __init__(self):
         self.timestamp = ""     # ISO 8601 Timestamp of start of stamp
@@ -62,7 +70,6 @@ class DeviceStamp:
         self.proto = {}         # Count dictionary for protocols
         self.dns = []           # Array of queried domains
         self.enc_type = {}      # Count dictionary for encryption types
-
 
 def main():
     if(len(sys.argv) == 3):
@@ -98,12 +105,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-def get_device_of_packet(src, dst):
-    for key, val in ip_name_dict.items():
-        if src in val:
-            return key
-        if dst in val:
-            return key
-    return 'unknown'
