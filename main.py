@@ -60,8 +60,8 @@ def get_device_of_packet(src, dst):
 
 class MasterStamp:
     def __init__(self):
-        self.timestamp = ""     # ISO 8601 Timestamp of start of stamp
-        self.duration = 0       # Duration of stamp in seconds
+        self.timestamp = ""     # ISO 8601 Timestamp of start of stamp TODO
+        self.duration = 0       # Duration of stamp in seconds TODO
         self.devices = {}       # Dictionary of Device Stamps
 
 
@@ -70,10 +70,10 @@ class DeviceStamp:
         self.total = 0          # Total amount of L4 packages
         self.total_ipv4 = 0     # Total amount of L4 packages
         self.total_ipv6 = 0     # Total amount of L4 packages
-        self.total_enc = 0      # Total amount of encrypted packages
+        self.total_enc = 0      # Total amount of encrypted packages TODO
         self.proto = {}         # Count dictionary for protocols
         self.dns = []           # Array of queried domains
-        self.enc_type = {}      # Count dictionary for encryption types
+        self.enc_type = {}      # Count dictionary for encryption types TODO
 
 def main():
     if(not len(sys.argv) == 3):
@@ -107,8 +107,6 @@ def main():
             dns_name = c.dns.qry_name
             if(not dns_name in mstamp.devices[dev_name].dns):
                 mstamp.devices[dev_name].dns.append(dns_name)
-
-    print(json.dumps(mstamp.devices["laptop"]))
 
     # TODO Serialize / Append this stamp object
     #if(not os.path.exists(output_file)):
