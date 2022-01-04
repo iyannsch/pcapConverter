@@ -50,13 +50,10 @@ def main():
     for c in cap:
         pkg_count += 1
 
-        if(c.layers[1].version == 4):
+        if(c.layers[1].version.show == "4"):
             pkg_count_ipv4 += 1
-        elif(c.layers[1].version == 6):
+        elif(c.layers[1].version.show == "6"):
             pkg_count_ipv6 += 1
-        #print(c.layers)
-        exit()
-    #print(count)
     print("Pkg count", pkg_count)
     print("Pkg count ip4", pkg_count_ipv4)
     print("Pkg count ip6", pkg_count_ipv6)
@@ -65,6 +62,8 @@ def main():
     stamp.total = pkg_count
     stamp.total_ipv4 = pkg_count_ipv4
     stamp.total_ipv6 = pkg_count_ipv6
+
+    # TODO Serialize / Append this stamp object
 
 if __name__ == "__main__":
     main()
