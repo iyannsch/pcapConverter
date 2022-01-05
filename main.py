@@ -2,6 +2,7 @@ import sys
 import os
 import pyshark
 import json
+from iputils import IPUtils
 
 usage = """usage: ./main.py [path to .pcap file] [duration in seconds] [path to .json database file]"""
 
@@ -64,6 +65,12 @@ class DeviceStamp:
         self.proto = {}         # Count dictionary for protocols
         self.dns = []           # Array of queried domains
         self.enc_type = {}      # Count dictionary for encryption types TODO
+        self.google_ipv4 = 0    # Total amount of IPv4 packages sent and received to/from googles ip range
+        self.google_ipv6 = 0    # Total amount of IPv6 packages sent and received to/from googles ip range
+        self.aws_ipv4 = 0       # Total amount of IPv4 packages sent and received to/from aws's ip range
+        self.aws_ipv6 = 0        # Total amount of IPv6 packages sent and received to/from aws's ip range
+        self.azure_ipv4 = 0     # Total amount of IPv4 packages sent and received to/from azures ip range
+        self.azure_ipv6 = 0     # Total amount of IPv6 packages sent and received to/from azures ip range
 
         self.services_ipv4 = {}      # Dictionary of services-traffic size in bytes in ipv4 TODO
         self.services_ipv6 = {}      # Dictionary of services-traffic size in bytes in ipv6 TODO
@@ -83,6 +90,7 @@ def main():
     cap = pyshark.FileCapture(file_name)
 
     mstamp = MasterStamp()
+    iputils = IPUtils()
 
     timestamp = file_name[4:-5]
     mstamp.timestamp = timestamp
@@ -105,6 +113,9 @@ def main():
         mstamp.devices[dev_name].total += 1
         if(c.layers[1].version.show == "4"):
             mstamp.devices[dev_name].total_ipv4 += 1
+
+            # Check IPs for cloud service providers
+            
         elif(c.layers[1].version.show == "6"):
             mstamp.devices[dev_name].total_ipv6 += 1
         proto_name = c.layers[1].proto.showname_value.split(" ")[0]
