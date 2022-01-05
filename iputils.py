@@ -22,10 +22,36 @@ class IPUtils:
     AZURE_IPV6.pop()
     file.close()
 
-    def check_G4(self, ipadr):
-        for ipnet in self.GOOGLE_IPV4:
-            if(ipaddress.ip_address(ipadr) in ipaddress.ip_network(ipnet)):
-                return True
-            
+    def check_Google(self, ipadr, isV4):
+        if(isV4 == True):
+            for ipnet in self.GOOGLE_IPV4:
+                if(ipaddress.ip_address(ipadr) in ipaddress.ip_network(ipnet)):
+                    return True
+        else:
+            for ipnet in self.GOOGLE_IPV6:
+                if(ipaddress.ip_address(ipadr) in ipaddress.ip_network(ipnet)):
+                    return True
+        return False
+    
+    def check_AWS(self, ipadr, isV4):
+        if(isV4 == True):
+            for ipnet in self.AWS_IPV4:
+                if(ipaddress.ip_address(ipadr) in ipaddress.ip_network(ipnet)):
+                    return True
+        else:
+            for ipnet in self.AWS_IPV6:
+                if(ipaddress.ip_address(ipadr) in ipaddress.ip_network(ipnet)):
+                    return True
+        return False
+
+    def check_Azure(self, ipadr, isV4):
+        if(isV4== True):
+            for ipnet in self.AZURE_IPV4:
+                if(ipaddress.ip_address(ipadr) in ipaddress.ip_network(ipnet)):
+                    return True
+        else:
+            for ipnet in self.AZURE_IPV6:
+                if(ipaddress.ip_address(ipadr) in ipaddress.ip_network(ipnet)):
+                    return True
         return False
     

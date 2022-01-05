@@ -65,15 +65,9 @@ class DeviceStamp:
         self.proto = {}         # Count dictionary for protocols
         self.dns = []           # Array of queried domains
         self.enc_type = {}      # Count dictionary for encryption types TODO
-        self.google_ipv4 = 0    # Total amount of IPv4 packages sent and received to/from googles ip range
-        self.google_ipv6 = 0    # Total amount of IPv6 packages sent and received to/from googles ip range
-        self.aws_ipv4 = 0       # Total amount of IPv4 packages sent and received to/from aws's ip range
-        self.aws_ipv6 = 0        # Total amount of IPv6 packages sent and received to/from aws's ip range
-        self.azure_ipv4 = 0     # Total amount of IPv4 packages sent and received to/from azures ip range
-        self.azure_ipv6 = 0     # Total amount of IPv6 packages sent and received to/from azures ip range
 
-        self.services_ipv4 = {}      # Dictionary of services-traffic size in bytes in ipv4 TODO
-        self.services_ipv6 = {}      # Dictionary of services-traffic size in bytes in ipv6 TODO
+        self.services_ipv4 = {"Google": 0, "AWS": 0, "Azure": 0}      # Dictionary of services-traffic size in bytes in ipv4 TODO
+        self.services_ipv6 = {"Google": 0, "AWS": 0, "Azure": 0}      # Dictionary of services-traffic size in bytes in ipv6 TODO
 
 def main():
     if(not len(sys.argv) == 4):
@@ -90,7 +84,7 @@ def main():
     cap = pyshark.FileCapture(file_name)
 
     mstamp = MasterStamp()
-    iputils = IPUtils()
+    ipu = IPUtils()
 
     timestamp = file_name[4:-5]
     mstamp.timestamp = timestamp
@@ -117,10 +111,31 @@ def main():
         if(c.layers[1].version.show == "4"):
             mstamp.devices[dev_name].total_ipv4 += 1
 
-            # Check IPs for cloud service providers
-            
+            # Check IPs for cloud service providers using IPv4
+            if(ipu.check_Google(c.ip.src, True) or ipu.check_Google(c.ip.dst, True)):
+                # This is a Google Cloud related packet
+                mstamp.devices[dev_name].services_ipv4["Google"] += c.length
+            elif(ipu.check_AWS(c.ip.src, True) or ipu.check_AWS(c.ip.dst, True)):
+                # This is an AWS related packet
+                mstamp.devices[dev_name].services_ipv4["AWS"] += c.length
+            elif(ipu.check_Azure(c.ip.src, True) or ipu.check_Azure(c.ip.dst, True)):
+                # This is an Azure related packet
+                mstamp.devices[dev_name].services_ipv4["Azure"] += c.length
+
         elif(c.layers[1].version.show == "6"):
             mstamp.devices[dev_name].total_ipv6 += 1
+
+            # Check IPs for cloud service providers using IPv6
+            if(ipu.check_Google(c.ip.src, False) or ipu.check_Google(c.ip.dst, False)):
+                # This is a Google Cloud related packet
+                mstamp.devices[dev_name].services_ipv6["Google"] += c.length
+            elif(ipu.check_AWS(c.ip.src, False) or ipu.check_AWS(c.ip.dst, False)):
+                # This is an AWS related packet
+                mstamp.devices[dev_name].services_ipv6["AWS"] += c.length
+            elif(ipu.check_Azure(c.ip.src, False) or ipu.check_Azure(c.ip.dst, False)):
+                # This is an Azure related packet
+                mstamp.devices[dev_name].services_ipv6["Azure"] += c.length
+
         proto_name = c.layers[1].proto.showname_value.split(" ")[0]
 
         if(proto_name in mstamp.devices[dev_name].proto):
