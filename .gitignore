@@ -1,1 +1,3 @@
 *.pcap
+*.pcap.cpy
+__pycache__
