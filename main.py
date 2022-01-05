@@ -82,6 +82,8 @@ def main():
     mstamp.duration = duration
 
     for c in cap:
+        if(len(c.layers) < 3):
+            continue
         dev_name = get_device_of_packet(c.ip.src, c.ip.dst)
         if(not (dev_name in mstamp.devices)):
             mstamp.devices[dev_name] = DeviceStamp()
