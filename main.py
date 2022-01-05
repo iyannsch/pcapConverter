@@ -224,7 +224,7 @@ def main():
         # Check if this is a HTTP packet
         if("HTTP" in c):
             # Unencrypted traffic that we want to log the service of
-            in_out = check_in_out_internal(c.ip.src, c.ip.dst)
+            in_out = check_in_out_internal(c.ip.src, c.ip.dst, ip_netws)
             service_ip = ""
             if(in_out == 0):
                 # incoming traffic: service-ip = src
