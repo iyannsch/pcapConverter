@@ -136,9 +136,6 @@ def main():
             elif(ipu.check_Azure(c.ip.src, True) or ipu.check_Azure(c.ip.dst, True)):
                 # This is an Azure related packet
                 mstamp.devices[dev_name].services_ipv4["Azure"] += pack_len
-
-            proto_name = c.layers[1].proto.showname_value.split(" ")[0]
-
         elif(c.layers[1].version.show == "6"):
             if(traffic_type == 0):
                 mstamp.devices[dev_name].total_in_ipv6_count += 1
@@ -160,9 +157,8 @@ def main():
             elif(ipu.check_Azure(c.ipv6.src, False) or ipu.check_Azure(c.ipv6.dst, False)):
                 # This is an Azure related packet
                 mstamp.devices[dev_name].services_ipv6["Azure"] += pack_len
-            
-            proto_name = c.layers[1].nxt.showname_value.split(" ")[0]
 
+        proto_name = c.frame_info.protocols.split(":")[-1]
         if(proto_name in mstamp.devices[dev_name].proto):
             mstamp.devices[dev_name].proto[proto_name] += 1
         else:
