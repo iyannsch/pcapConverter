@@ -47,8 +47,8 @@ class MasterStamp:
 
 class DeviceStamp:
     def __init__(self):
-        self.total_count = 0                # Total amount of packages generally TODO
-        self.total_size = 0                 # Total size of packages generally TODO
+        self.total_count = 0                # Total amount of packages generally
+        self.total_size = 0                 # Total size of packages generally
 
         self.total_out_ipv4_count = 0       # Total amount of outgoing packages TODO
         self.total_in_ipv4_count = 0        # Total amount of incoming packages TODO
@@ -58,6 +58,11 @@ class DeviceStamp:
         self.total_in_ipv4_size = 0         # Total size of incoming packages in bytes TODO
         self.total_out_ipv6_size = 0        # Total size of outgoing packages in bytes TODO
         self.total_in_ipv6_size = 0         # Total size of incoming packages in bytes TODO
+
+        self.total_internal_ipv4_count = 0  # Total amount of intenral packages TODO
+        self.total_internal_ipv4_size = 0   # Total size of internal packages in bytes TODO
+        self.total_internal_ipv6_count = 0  # Total amount of intenral packages TODO
+        self.total_internal_ipv6_size = 0   # Total size of internal packages in bytes TODO
 
         self.total_enc_count = 0      # Total amount of encrypted packages TODO
         self.total_enc_size = 0      # Total size of encrypted packages in bytes TODO
@@ -99,44 +104,64 @@ def main():
             traffic_type = check_in_out_internal(c.ip.src, c.ip.dst)
         elif(c.layers[1].version.show == "6"):
             dev_name = get_device_of_packet(c.ipv6.src, c.ipv6.dst)
-            traffic_type = check_in_out_internal(c.ipv4.src, c.ipv6.dst)
+            traffic_type = check_in_out_internal(c.ipv6.src, c.ipv6.dst)
         else:
-            continue
+            continue # We ignore all non-ipv4 or ipv6 packages
 
         if(not (dev_name in mstamp.devices)):
             mstamp.devices[dev_name] = DeviceStamp()
 
         mstamp.devices[dev_name].total_count += 1
-        mstamp.devices[dev_name].total_size += c.length
+        pack_len = int(c.length) # Length of Ethernet Frame in bytes
+        mstamp.devices[dev_name].total_size += pack_len
         if(c.layers[1].version.show == "4"):
-            mstamp.devices[dev_name].total_ipv4 += 1
+            if(traffic_type == 0):
+                mstamp.devices[dev_name].total_in_ipv4_count += 1
+                mstamp.devices[dev_name].total_in_ipv4_size += pack_len
+            elif(traffic_type == 1):
+                mstamp.devices[dev_name].total_out_ipv4_count += 1
+                mstamp.devices[dev_name].total_out_ipv4_size += pack_len
+            elif(traffic_type == 2):
+                mstamp.devices[dev_name].total_internal_ipv4_count += 1
+                mstamp.devices[dev_name].total_internal_ipv4_size += pack_len
 
             # Check IPs for cloud service providers using IPv4
             if(ipu.check_Google(c.ip.src, True) or ipu.check_Google(c.ip.dst, True)):
                 # This is a Google Cloud related packet
-                mstamp.devices[dev_name].services_ipv4["Google"] += c.length
+                mstamp.devices[dev_name].services_ipv4["Google"] += pack_len
             elif(ipu.check_AWS(c.ip.src, True) or ipu.check_AWS(c.ip.dst, True)):
                 # This is an AWS related packet
-                mstamp.devices[dev_name].services_ipv4["AWS"] += c.length
+                mstamp.devices[dev_name].services_ipv4["AWS"] += pack_len
             elif(ipu.check_Azure(c.ip.src, True) or ipu.check_Azure(c.ip.dst, True)):
                 # This is an Azure related packet
-                mstamp.devices[dev_name].services_ipv4["Azure"] += c.length
+                mstamp.devices[dev_name].services_ipv4["Azure"] += pack_len
+
+            proto_name = c.layers[1].proto.showname_value.split(" ")[0]
 
         elif(c.layers[1].version.show == "6"):
-            mstamp.devices[dev_name].total_ipv6 += 1
+            if(traffic_type == 0):
+                mstamp.devices[dev_name].total_in_ipv6_count += 1
+                mstamp.devices[dev_name].total_in_ipv6_size += pack_len
+            elif(traffic_type == 1):
+                mstamp.devices[dev_name].total_out_ipv6_count += 1
+                mstamp.devices[dev_name].total_out_ipv6_size += pack_len
+            elif(traffic_type == 2):
+                mstamp.devices[dev_name].total_internal_ipv6_count += 1
+                mstamp.devices[dev_name].total_internal_ipv6_size += pack_len
 
             # Check IPs for cloud service providers using IPv6
-            if(ipu.check_Google(c.ip.src, False) or ipu.check_Google(c.ip.dst, False)):
+            if(ipu.check_Google(c.ipv6.src, False) or ipu.check_Google(c.ipv6.dst, False)):
                 # This is a Google Cloud related packet
-                mstamp.devices[dev_name].services_ipv6["Google"] += c.length
-            elif(ipu.check_AWS(c.ip.src, False) or ipu.check_AWS(c.ip.dst, False)):
+                mstamp.devices[dev_name].services_ipv6["Google"] += pack_len
+            elif(ipu.check_AWS(c.ipv6.src, False) or ipu.check_AWS(c.ipv6.dst, False)):
                 # This is an AWS related packet
-                mstamp.devices[dev_name].services_ipv6["AWS"] += c.length
-            elif(ipu.check_Azure(c.ip.src, False) or ipu.check_Azure(c.ip.dst, False)):
+                mstamp.devices[dev_name].services_ipv6["AWS"] += pack_len
+            elif(ipu.check_Azure(c.ipv6.src, False) or ipu.check_Azure(c.ipv6.dst, False)):
                 # This is an Azure related packet
-                mstamp.devices[dev_name].services_ipv6["Azure"] += c.length
+                mstamp.devices[dev_name].services_ipv6["Azure"] += pack_len
+            
+            proto_name = c.layers[1].nxt.showname_value.split(" ")[0]
 
-        proto_name = c.layers[1].proto.showname_value.split(" ")[0]
 
         if(proto_name in mstamp.devices[dev_name].proto):
             mstamp.devices[dev_name].proto[proto_name] += 1
