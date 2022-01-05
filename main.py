@@ -3,6 +3,7 @@ import os
 import pyshark
 import json
 from iputils import IPUtils
+import socket
 
 usage = """usage: ./main.py [path to .pcap file] [duration in seconds] [path to .json database file]"""
 
@@ -162,16 +163,38 @@ def main():
             
             proto_name = c.layers[1].nxt.showname_value.split(" ")[0]
 
-
         if(proto_name in mstamp.devices[dev_name].proto):
             mstamp.devices[dev_name].proto[proto_name] += 1
         else:
             mstamp.devices[dev_name].proto[proto_name] = 1
 
+        # Check if this is a DNS packet
         if("DNS" in c):
             dns_name = c.dns.qry_name
             if(not dns_name in mstamp.devices[dev_name].dns):
                 mstamp.devices[dev_name].dns.append(dns_name)
+
+        # Check if this is a HTTP packet
+        if("HTTP" in c):
+            # Unencrypted traffic that we want to log the service of
+            in_out = check_in_out_internal(c.ip.src, c.ip.dst)
+            service_ip = ""
+            if(in_out == 0):
+                # incoming traffic: service-ip = src
+                service_ip = c.ip.src
+            elif(in_out == 1):
+                # outgoing traffic: service-ip = dst
+                service_ip = c.ip.dst
+            
+            if(service_ip != ""):
+                #try reverse dns
+                try:
+                    domain = socket.gethostbyaddr(service_ip)[0]
+                except socket.herror:
+                    domain = service_ip
+                if(not domain in mstamp.http_using):
+                    mstamp.http_using.append(domain)
+
 
     ###################################
     # Serialize and Append to JSON db #
