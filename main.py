@@ -33,6 +33,10 @@ def get_device_of_packet(src, dst):
             return key
     return 'unknown'
 
+# Return 0 if incoming, 1 if outgoing, and 2 if internal
+def check_in_out_internal(src, dst):
+    return 0
+
 class MasterStamp:
     def __init__(self):
         self.timestamp = ""     # ISO 8601 Timestamp of start of stamp
@@ -42,14 +46,17 @@ class MasterStamp:
 
 class DeviceStamp:
     def __init__(self):
-        self.total_out_ipv4_count = 0       # Total amount of outgoing L4 packages TODO
-        self.total_in_ipv4_count = 0        # Total amount of incoming L4 packages TODO
-        self.total_out_ipv6_count = 0       # Total amount of outgoing L4 packages TODO
-        self.total_in_ipv6_count = 0        # Total amount of incoming L4 packages TODO
-        self.total_out_ipv4_size = 0        # Total size of outgoing L4 packages in bytes TODO
-        self.total_in_ipv4_size = 0         # Total size of incoming L4 packages in bytes TODO
-        self.total_out_ipv6_size = 0        # Total size of outgoing L4 packages in bytes TODO
-        self.total_in_ipv6_size = 0         # Total size of incoming L4 packages in bytes TODO
+        self.total_count = 0                # Total amount of packages generally TODO
+        self.total_size = 0                 # Total size of packages generally TODO
+
+        self.total_out_ipv4_count = 0       # Total amount of outgoing packages TODO
+        self.total_in_ipv4_count = 0        # Total amount of incoming packages TODO
+        self.total_out_ipv6_count = 0       # Total amount of outgoing packages TODO
+        self.total_in_ipv6_count = 0        # Total amount of incoming packages TODO
+        self.total_out_ipv4_size = 0        # Total size of outgoing packages in bytes TODO
+        self.total_in_ipv4_size = 0         # Total size of incoming packages in bytes TODO
+        self.total_out_ipv6_size = 0        # Total size of outgoing packages in bytes TODO
+        self.total_in_ipv6_size = 0         # Total size of incoming packages in bytes TODO
 
         self.total_enc_count = 0      # Total amount of encrypted packages TODO
         self.total_enc_size = 0      # Total size of encrypted packages in bytes TODO
@@ -84,7 +91,14 @@ def main():
     for c in cap:
         if(len(c.layers) < 3):
             continue
-        dev_name = get_device_of_packet(c.ip.src, c.ip.dst)
+
+        if(c.layers[1].version.show == "4"):
+            dev_name = get_device_of_packet(c.ip.src, c.ip.dst)
+        elif(c.layers[1].version.show == "6"):
+            dev_name = get_device_of_packet(c.ipv6.src, c.ipv6.dst)
+        else:
+            continue
+
         if(not (dev_name in mstamp.devices)):
             mstamp.devices[dev_name] = DeviceStamp()
 
@@ -104,7 +118,6 @@ def main():
             dns_name = c.dns.qry_name
             if(not dns_name in mstamp.devices[dev_name].dns):
                 mstamp.devices[dev_name].dns.append(dns_name)
-
 
     ###################################
     # Serialize and Append to JSON db #
