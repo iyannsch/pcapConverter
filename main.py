@@ -3,6 +3,9 @@ import os
 import pyshark
 import json
 from iputils import IPUtils
+import ipaddress
+import netifaces
+from netifaces import AF_INET, AF_INET6
 
 usage = """usage: ./main.py [path to .pcap file] [duration in seconds] [path to .json database file]"""
 
@@ -34,9 +37,39 @@ def get_device_of_packet(src, dst):
             return key
     return 'unknown'
 
+def format_ip(a):
+    addr = ipaddress.ip_address(a["addr"])
+    backup = "255.255.255.0" if (addr.version == 4) else "ffff:ffff:ffff:ffff::"
+    netmask = ipaddress.ip_interface(a.setdefault("netmask", backup)).ip
+    cnt = 0
+    for b in netmask.packed:
+        bcnt = 0
+        bt = b
+        for _ in range(8):
+            bcnt += bt & 0x01
+            bt >>= 1
+        cnt += bcnt
+    return addr.compressed + "/" + str(cnt)
+
 # Return 0 if incoming, 1 if outgoing, and 2 if internal
-def check_in_out_internal(src, dst):
-    return 0
+def check_in_out_internal(src, dst, ip_netws):
+    ipsrc = ipaddress.ip_address(src)
+    ipdst = ipaddress.ip_address(dst)
+
+    src_in_net = False
+    for netw in ip_netws:
+        src_in_net |= ipsrc in netw
+
+    dst_in_net = False
+    for netw in ip_netws:
+        dst_in_net |= ipdst in netw
+
+    if(src_in_net and (not dst_in_net)):
+        return 0
+    elif((not src_in_net) and dst_in_net):
+        return 1
+    else:
+        return 2 # Assuming this is internal traffic
 
 class MasterStamp:
     def __init__(self):
@@ -75,12 +108,30 @@ class DeviceStamp:
         self.services_ipv6 = {"Google": 0, "AWS": 0, "Azure": 0}      # Dictionary of services-traffic size in bytes in ipv6 TODO
 
 def main():
-    if(not len(sys.argv) == 4):
+
+    #########
+    # Setup #
+    #########
+
+    if(not len(sys.argv) == 5):
         print(usage)
         exit(1)
     file_name = sys.argv[1]
-    duration = int(sys.argv[2])
-    output_file = sys.argv[3]
+    output_file = sys.argv[2]
+
+    duration = int(sys.argv[3])
+    interface = sys.argv[4]
+
+    # The following is a hack because the addresses of netifaces are not the correct
+    # format that ipaddress.ip_network uses
+    ipv4addrs = netifaces.ifaddresses(interface)[AF_INET]
+    ipv6addrs = netifaces.ifaddresses(interface)[AF_INET6]
+    ipv4addr_formatted = [format_ip(a)  for a in ipv4addrs]
+    ipv6addr_formatted = [format_ip(a)  for a in ipv6addrs]
+    ipv4_netws = [ipaddress.ip_network(ip, strict=False) for ip in ipv4addr_formatted]
+    ipv6_netws = [ipaddress.ip_network(ip, strict=False) for ip in ipv6addr_formatted]
+    ip_netws = ipv4_netws + ipv6_netws
+    # netws are arrays of ip network, used later to check whether an ip is in the network
 
     #################################
     # Parsing Capture Data          #
@@ -101,10 +152,10 @@ def main():
 
         if(c.layers[1].version.show == "4"):
             dev_name = get_device_of_packet(c.ip.src, c.ip.dst)
-            traffic_type = check_in_out_internal(c.ip.src, c.ip.dst)
+            traffic_type = check_in_out_internal(c.ip.src, c.ip.dst, ip_netws)
         elif(c.layers[1].version.show == "6"):
             dev_name = get_device_of_packet(c.ipv6.src, c.ipv6.dst)
-            traffic_type = check_in_out_internal(c.ipv6.src, c.ipv6.dst)
+            traffic_type = check_in_out_internal(c.ipv6.src, c.ipv6.dst, ip_netws)
         else:
             continue # We ignore all non-ipv4 or ipv6 packages
 

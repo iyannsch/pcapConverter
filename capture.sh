@@ -5,4 +5,4 @@ INTERFACE=interface # Change interface here
 DURATION=900 # Duration in seconds
 PATH_JSONDB=data/db.json # Path to JSON db
 timeout --preserve-status $DURATION tcpdump -i $INTERFACE -w $FILENAME \
-        && python main.py $FILENAME $DURATION $PATH_JSONDB
+        && python main.py $FILENAME $PATH_JSONDB $DURATION $INTERFACE
