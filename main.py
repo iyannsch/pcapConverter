@@ -38,16 +38,28 @@ class MasterStamp:
         self.timestamp = ""     # ISO 8601 Timestamp of start of stamp
         self.duration = 0       # Duration of stamp in seconds
         self.devices = {}       # Dictionary of Device Stamps
+        self.http_using = []    # Array of services that use HTTP TODO
 
 class DeviceStamp:
     def __init__(self):
-        self.total = 0          # Total amount of L4 packages
-        self.total_ipv4 = 0     # Total amount of L4 packages
-        self.total_ipv6 = 0     # Total amount of L4 packages
-        self.total_enc = 0      # Total amount of encrypted packages TODO
+        self.total_out_ipv4_count = 0       # Total amount of outgoing L4 packages TODO
+        self.total_in_ipv4_count = 0        # Total amount of incoming L4 packages TODO
+        self.total_out_ipv6_count = 0       # Total amount of outgoing L4 packages TODO
+        self.total_in_ipv6_count = 0        # Total amount of incoming L4 packages TODO
+        self.total_out_ipv4_size = 0        # Total size of outgoing L4 packages in bytes TODO
+        self.total_in_ipv4_size = 0         # Total size of incoming L4 packages in bytes TODO
+        self.total_out_ipv6_size = 0        # Total size of outgoing L4 packages in bytes TODO
+        self.total_in_ipv6_size = 0         # Total size of incoming L4 packages in bytes TODO
+
+        self.total_enc_count = 0      # Total amount of encrypted packages TODO
+        self.total_enc_size = 0      # Total size of encrypted packages in bytes TODO
+
         self.proto = {}         # Count dictionary for protocols
         self.dns = []           # Array of queried domains
         self.enc_type = {}      # Count dictionary for encryption types TODO
+
+        self.services_ipv4 = {}      # Dictionary of services-traffic size in bytes in ipv4 TODO
+        self.services_ipv6 = {}      # Dictionary of services-traffic size in bytes in ipv6 TODO
 
 def main():
     if(not len(sys.argv) == 4):
