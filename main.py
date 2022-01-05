@@ -102,15 +102,18 @@ def main():
 
         if(c.layers[1].version.show == "4"):
             dev_name = get_device_of_packet(c.ip.src, c.ip.dst)
+            traffic_type = check_in_out_internal(c.ip.src, c.ip.dst)
         elif(c.layers[1].version.show == "6"):
             dev_name = get_device_of_packet(c.ipv6.src, c.ipv6.dst)
+            traffic_type = check_in_out_internal(c.ipv4.src, c.ipv6.dst)
         else:
             continue
 
         if(not (dev_name in mstamp.devices)):
             mstamp.devices[dev_name] = DeviceStamp()
 
-        mstamp.devices[dev_name].total += 1
+        mstamp.devices[dev_name].total_count += 1
+        mstamp.devices[dev_name].total_size += c.length
         if(c.layers[1].version.show == "4"):
             mstamp.devices[dev_name].total_ipv4 += 1
 
