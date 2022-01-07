@@ -208,6 +208,13 @@ def main():
             elif(ipu.check_Azure(c.ipv6.src, False) or ipu.check_Azure(c.ipv6.dst, False)):
                 # This is an Azure related packet
                 mstamp.devices[dev_name].services_ipv6["Azure"] += pack_len
+        
+        #check if the packets are encrypted
+        encrypted_packet_types=["QUIC", "ICMP", "TCP", "UDP", "TLS"]
+        if(any(encrypted_packet_types) in c):
+            mstamp.devices[dev_name].total_enc_count+=1
+            mstamp.devices[dev_name].total_enc_size +=pack_len
+                
 
         proto_name = c.frame_info.protocols.split(":")[-1]
         if(proto_name in mstamp.devices[dev_name].proto):
