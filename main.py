@@ -165,6 +165,7 @@ def main():
             # Check IPs for cloud service providers using IPv4
             if(ipu.is_in_not_cache(c.ip.src, True) and ipu.is_in_not_cache(c.ip.dst, True)):
                 # Do nothing, the pair src<->dst was already identified as not containing a cloud service provider
+                pass
             elif(ipu.check_Google(c.ip.src, True) or ipu.check_Google(c.ip.dst, True)):
                 # This is a Google Cloud related packet
                 mstamp.devices[dev_name].services_ipv4["Google"] += pack_len
@@ -191,6 +192,7 @@ def main():
             # Check IPs for cloud service providers using IPv6
             if(ipu.is_in_not_cache(c.ip.src, False) and ipu.is_in_not_cache(c.ip.dst, False)):
                 # Do nothing, the pair src<->dst was already identified as not containing a cloud service provider
+                pass
             elif(ipu.check_Google(c.ipv6.src, False) or ipu.check_Google(c.ipv6.dst, False)):
                 # This is a Google Cloud related packet
                 mstamp.devices[dev_name].services_ipv6["Google"] += pack_len

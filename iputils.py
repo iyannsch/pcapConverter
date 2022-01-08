@@ -37,6 +37,12 @@ class IPUtils:
                 return True
         return False
 
+    def add_to_not_cache(self, ipadr, isV4):
+        if(isV4 == True):
+            self.ip4_not_cache.append(ipadr)
+        else:
+            self.ip6_not_cache.append(ipadr)
+
     def check_Google(self, ipadr, isV4):
         if(isV4 == True):
             if(ipadr in self.ip4_cache and self.ip4_cache[ipadr] == "Google"):
