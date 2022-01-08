@@ -7,28 +7,9 @@ import ipaddress
 import netifaces
 from netifaces import AF_INET, AF_INET6
 import socket
+from devconfig import ip_name_dict
 
 usage = """usage: ./main.py [path to .pcap file] [duration in seconds] [path to .json database file]"""
-
-# Here you can define the devices you expect to find traces from
-ip_name_dict = {
-    'localhost': [
-        '192.168.0.1',
-        '127.0.0.1'
-    ],
-    'next_device': [
-        'all',
-        'of',
-        'the',
-        'IPv4',
-        'and'
-        'IPv6',
-        'addresses'
-    ],
-    'laptop': [
-        '192.168.5.185',
-    ]
-}
 
 def get_device_of_packet(src, dst):
     for key, val in ip_name_dict.items():
