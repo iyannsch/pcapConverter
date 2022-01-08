@@ -163,7 +163,9 @@ def main():
                 mstamp.devices[dev_name].total_internal_ipv4_size += pack_len
 
             # Check IPs for cloud service providers using IPv4
-            if(ipu.check_Google(c.ip.src, True) or ipu.check_Google(c.ip.dst, True)):
+            if(ipu.is_in_not_cache(c.ip.src, True) and ipu.is_in_not_cache(c.ip.dst, True)):
+                # Do nothing, the pair src<->dst was already identified as not containing a cloud service provider
+            elif(ipu.check_Google(c.ip.src, True) or ipu.check_Google(c.ip.dst, True)):
                 # This is a Google Cloud related packet
                 mstamp.devices[dev_name].services_ipv4["Google"] += pack_len
             elif(ipu.check_AWS(c.ip.src, True) or ipu.check_AWS(c.ip.dst, True)):
@@ -172,6 +174,9 @@ def main():
             elif(ipu.check_Azure(c.ip.src, True) or ipu.check_Azure(c.ip.dst, True)):
                 # This is an Azure related packet
                 mstamp.devices[dev_name].services_ipv4["Azure"] += pack_len
+            else:
+                ipu.add_to_not_cache(c.ip.src, True)
+                ipu.add_to_not_cache(c.ip.dst, True)
         elif(c.layers[1].version.show == "6"):
             if(traffic_type == 0):
                 mstamp.devices[dev_name].total_in_ipv6_count += 1
@@ -184,7 +189,9 @@ def main():
                 mstamp.devices[dev_name].total_internal_ipv6_size += pack_len
 
             # Check IPs for cloud service providers using IPv6
-            if(ipu.check_Google(c.ipv6.src, False) or ipu.check_Google(c.ipv6.dst, False)):
+            if(ipu.is_in_not_cache(c.ip.src, False) and ipu.is_in_not_cache(c.ip.dst, False)):
+                # Do nothing, the pair src<->dst was already identified as not containing a cloud service provider
+            elif(ipu.check_Google(c.ipv6.src, False) or ipu.check_Google(c.ipv6.dst, False)):
                 # This is a Google Cloud related packet
                 mstamp.devices[dev_name].services_ipv6["Google"] += pack_len
             elif(ipu.check_AWS(c.ipv6.src, False) or ipu.check_AWS(c.ipv6.dst, False)):
@@ -193,7 +200,9 @@ def main():
             elif(ipu.check_Azure(c.ipv6.src, False) or ipu.check_Azure(c.ipv6.dst, False)):
                 # This is an Azure related packet
                 mstamp.devices[dev_name].services_ipv6["Azure"] += pack_len
-        
+            else:
+                ipu.add_to_not_cache(c.ip.src, False)
+                ipu.add_to_not_cache(c.ip.dst, False)
         #check if the packets are encrypted
         encrypted_packet_types=["QUIC", "ICMP", "TCP", "UDP", "TLS"]
         if(any(encrypted_packet_types) in c):
