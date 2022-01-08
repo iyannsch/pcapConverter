@@ -101,7 +101,7 @@ class DeviceStamp:
         self.total_enc_count = 0      # Total amount of encrypted packages TODO
         self.total_enc_size = 0      # Total size of encrypted packages in bytes TODO
 
-        self.proto = {}         # Count dictionary for protocols
+        self.proto = {}         # Size dictionary for protocols in bytes
         self.dns = []           # Array of queried domains
         self.enc_type = {}      # Count dictionary for encryption types TODO
 
@@ -222,9 +222,9 @@ def main():
 
         proto_name = c.frame_info.protocols.split(":")[-1]
         if(proto_name in mstamp.devices[dev_name].proto):
-            mstamp.devices[dev_name].proto[proto_name] += 1
+            mstamp.devices[dev_name].proto[proto_name] += pack_len
         else:
-            mstamp.devices[dev_name].proto[proto_name] = 1
+            mstamp.devices[dev_name].proto[proto_name] = pack_len
 
         # Check if this is a DNS packet
         if("DNS" in c):
