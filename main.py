@@ -154,9 +154,13 @@ def main():
         if(c.layers[1].version.show == "4"):
             dev_name = get_device_of_packet(c.ip.src, c.ip.dst)
             traffic_type = check_in_out_internal(c.ip.src, c.ip.dst, ip_netws)
+            ipsrc = c.ip.src
+            ipdst = c.ip.dst
         elif(c.layers[1].version.show == "6"):
             dev_name = get_device_of_packet(c.ipv6.src, c.ipv6.dst)
             traffic_type = check_in_out_internal(c.ipv6.src, c.ipv6.dst, ip_netws)
+            ipsrc = c.ipv6.src
+            ipdst = c.ipv6.dst
         else:
             continue # We ignore all non-ipv4 or ipv6 packages
 
@@ -231,17 +235,14 @@ def main():
         # Check if this is a HTTP packet
         if("HTTP" in c):
             # Unencrypted traffic that we want to log the service of
-            if("ip" in c):
-                in_out = check_in_out_internal(c.ip.src, c.ip.dst, ip_netws)
-            else:
-                in_out = check_in_out_internal(c.ipv6.src, c.ipv6.dst, ip_netws)
+            in_out = check_in_out_internal(ipsrc, ipdst, ip_netws)
             service_ip = ""
             if(in_out == 0):
                 # incoming traffic: service-ip = src
-                service_ip = c.ip.src
+                service_ip = ipsrc
             elif(in_out == 1):
                 # outgoing traffic: service-ip = dst
-                service_ip = c.ip.dst
+                service_ip = ipdst
             
             if(service_ip != ""):
                 #try reverse dns
