@@ -220,7 +220,7 @@ def main():
             mstamp.devices[dev_name].total_enc_size +=pack_len
                 
 
-        proto_name = c.frame_info.protocols.split(":")[-1]
+        proto_name = c.frame_info.protocols
         if(proto_name in mstamp.devices[dev_name].proto):
             mstamp.devices[dev_name].proto[proto_name] += pack_len
         else:
