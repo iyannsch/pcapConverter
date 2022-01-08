@@ -190,7 +190,7 @@ def main():
                 mstamp.devices[dev_name].total_internal_ipv6_size += pack_len
 
             # Check IPs for cloud service providers using IPv6
-            if(ipu.is_in_not_cache(c.ip.src, False) and ipu.is_in_not_cache(c.ip.dst, False)):
+            if(ipu.is_in_not_cache(c.ipv6.src, False) and ipu.is_in_not_cache(c.ipv6.dst, False)):
                 # Do nothing, the pair src<->dst was already identified as not containing a cloud service provider
                 pass
             elif(ipu.check_Google(c.ipv6.src, False) or ipu.check_Google(c.ipv6.dst, False)):
@@ -203,8 +203,8 @@ def main():
                 # This is an Azure related packet
                 mstamp.devices[dev_name].services_ipv6["Azure"] += pack_len
             else:
-                ipu.add_to_not_cache(c.ip.src, False)
-                ipu.add_to_not_cache(c.ip.dst, False)
+                ipu.add_to_not_cache(c.ipv6.src, False)
+                ipu.add_to_not_cache(c.ipv6.dst, False)
         #check if the packets are encrypted
         encrypted_packet_types=["QUIC", "ICMP", "TCP", "UDP", "TLS"]
         if(any(encrypted_packet_types) in c):
