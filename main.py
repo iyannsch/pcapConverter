@@ -85,7 +85,6 @@ class DeviceStamp:
 
         self.proto = {}         # Size dictionary for protocols in bytes
         self.dns = []           # Array of queried domains
-        self.enc_type = {}      # Count dictionary for encryption types TODO
 
         self.services_ipv4 = {"Google": 0, "AWS": 0, "Azure": 0}      # Dictionary of services-traffic size in bytes in ipv4 TODO
         self.services_ipv6 = {"Google": 0, "AWS": 0, "Azure": 0}      # Dictionary of services-traffic size in bytes in ipv6 TODO
