@@ -47,9 +47,9 @@ def check_in_out_internal(src, dst, ip_netws):
         dst_in_net |= ipdst in netw
 
     if(src_in_net and (not dst_in_net)):
-        return 0
-    elif((not src_in_net) and dst_in_net):
         return 1
+    elif((not src_in_net) and dst_in_net):
+        return 0
     else:
         return 2 # Assuming this is internal traffic
 
