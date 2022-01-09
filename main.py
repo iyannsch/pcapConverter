@@ -81,7 +81,7 @@ class DeviceStamp:
 
         self.total_enc_count = 0      # Total amount of encrypted packages TODO
         self.total_enc_size = 0      # Total size of encrypted packages in bytes TODO
-        self.encryption.protocols={"TLS":0, "SSL":0,"IPsec":0,"SSH":0,"PGP":0,"MIME":0}
+        self.encryption_protocols={"TLS":0, "SSL":0,"IPsec":0,"SSH":0,"PGP":0,"MIME":0} # Encryption packets used
 
         self.proto = {}         # Size dictionary for protocols in bytes
         self.dns = []           # Array of queried domains
@@ -207,23 +207,23 @@ def main():
                 ipu.add_to_not_cache(c.ipv6.src, False)
                 ipu.add_to_not_cache(c.ipv6.dst, False)
         #Check if the packets are encrypted and which specific protocols are being used
-        if(any(mstamp.devices[dev_name].encrypted_packet_types.keys()) in c):
+        if(any(mstamp.devices[dev_name].encryption_protocols.keys()) in c):
             mstamp.devices[dev_name].total_enc_count+=1
             
             mstamp.devices[dev_name].total_enc_size +=pack_len
             
             if("TLS" in c):
-                mstamp.devices[dev_name].encrypted_packet_types["TLS"]+= 1
+                mstamp.devices[dev_name].encryption_protocols["TLS"]+= 1
             elif("SSL" in c):
-                mstamp.devices[dev_name].encrypted_packet_types["SSL"]+= 1
+                mstamp.devices[dev_name].encryption_protocols["SSL"]+= 1
             elif("IPsec" in c):
-                mstamp.devices[dev_name].encrypted_packet_types["IPsec"]+= 1
+                mstamp.devices[dev_name].encryption_protocols["IPsec"]+= 1
             elif("SSH" in c):
-                mstamp.devices[dev_name].encrypted_packet_types["SSH"]+= 1
+                mstamp.devices[dev_name].encryption_protocols["SSH"]+= 1
             elif("PGP" in c):
-                mstamp.devices[dev_name].encrypted_packet_types["PGP"]+= 1
+                mstamp.devices[dev_name].encryption_protocols["PGP"]+= 1
             elif("MIME" in c):
-                 mstamp.devices[dev_name].encrypted_packet_types["MIME"]+= 1
+                 mstamp.devices[dev_name].encryption_protocols["MIME"]+= 1
                 
                 
 
