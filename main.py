@@ -263,11 +263,11 @@ def main():
                     if(not domain in mstamp.http_using):
                         mstamp.http_using.append(domain)
         except:
-            error_count += 0
+            error_count += 1
             continue
 
     with open("logs/" + file_name + ".log", "w+") as f:
-        f_str += "error_count: " + str(error_count) + ",count: " + str(count) + "\n"
+        f_str = "error_count: " + str(error_count) + ",count: " + str(count) + "\n"
         f.write(f_str)
 
 
