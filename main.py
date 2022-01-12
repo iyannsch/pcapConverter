@@ -4,10 +4,9 @@ import pyshark
 import json
 from iputils import IPUtils
 import ipaddress
-import netifaces
-from netifaces import AF_INET, AF_INET6
 import socket
 from devconfig import ip_name_dict
+from netconfig import home_nets
 
 usage = """usage: ./main.py [path to .pcap file] [duration in seconds] [path to .json database file]"""
 
@@ -18,20 +17,6 @@ def get_device_of_packet(src, dst):
         if dst in val:
             return key
     return 'unknown'
-
-def format_ip(a):
-    addr = ipaddress.ip_address(a["addr"])
-    backup = "255.255.255.0" if (addr.version == 4) else "ffff:ffff:ffff:ffff::"
-    netmask = ipaddress.ip_interface(a.setdefault("netmask", backup)).ip
-    cnt = 0
-    for b in netmask.packed:
-        bcnt = 0
-        bt = b
-        for _ in range(8):
-            bcnt += bt & 0x01
-            bt >>= 1
-        cnt += bcnt
-    return addr.compressed + "/" + str(cnt)
 
 # Return 0 if incoming, 1 if outgoing, and 2 if internal
 def check_in_out_internal(src, dst, ip_netws):
@@ -95,24 +80,17 @@ def main():
     # Setup #
     #########
 
-    if(not len(sys.argv) == 5):
+    if(not len(sys.argv) == 4):
         print(usage)
         exit(1)
     file_name = sys.argv[1]
     output_file = sys.argv[2]
 
     duration = int(sys.argv[3])
-    interface = sys.argv[4]
 
-    # The following is a hack because the addresses of netifaces are not the correct
-    # format that ipaddress.ip_network uses
-    ipv4addrs = netifaces.ifaddresses(interface)[AF_INET]
-    ipv6addrs = netifaces.ifaddresses(interface)[AF_INET6]
-    ipv4addr_formatted = [format_ip(a)  for a in ipv4addrs]
-    ipv6addr_formatted = [format_ip(a)  for a in ipv6addrs]
-    ipv4_netws = [ipaddress.ip_network(ip, strict=False) for ip in ipv4addr_formatted]
-    ipv6_netws = [ipaddress.ip_network(ip, strict=False) for ip in ipv6addr_formatted]
-    ip_netws = ipv4_netws + ipv6_netws
+    ipv4_netw = ipaddress.ip_network(home_nets["ipv4"], strict=False)
+    ipv6_netw = ipaddress.ip_network(home_nets["ipv6"], strict=False)
+    ip_netws = [ipv4_netw, ipv6_netw]
     # netws are arrays of ip network, used later to check whether an ip is in the network
 
     #################################
