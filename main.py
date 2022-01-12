@@ -8,7 +8,7 @@ import socket
 from devconfig import ip_name_dict
 from netconfig import home_nets
 
-usage = """usage: ./main.py [path to .pcap file] [duration in seconds] [path to .json database file]"""
+usage = """usage: ./main.py [path to .pcap file] [path to .json database file] [duration in seconds]"""
 
 def get_device_of_packet(src, dst):
     for key, val in ip_name_dict.items():
