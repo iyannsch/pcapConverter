@@ -8,4 +8,10 @@ Under the folder `analysis` you can find jupyter notebook we used for the figure
 
 ## Python Code
 
-Also in this repository you can find the code we used to capture our traffic data. We used the script `capture.sh` under a 15 min cronjob to create and process the traffic data into json files. These json files are then used by the jupyter notebooks.
+Also in this repository you can find the code we used to capture our traffic data. We used the script `capture.sh` under a 15 min cronjob to create and process the traffic data into json files. The line to add to the crontab is as seen below:
+
+```bash
+* * * * * cd [path to repository] && bash ./capture.sh
+```
+
+These json files are then used by the jupyter notebooks.
